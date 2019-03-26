@@ -18,7 +18,7 @@ function sr2_training_makeTargetFiles(varargin)
 for s=varargin{1}
     for d=varargin{2}
         fprintf(1,'\nsubj: %d   session/day: %d\n',s,d);
-        sr2_rt_target(s,d);
+        %sr2_rt_target(s,d);
         sr2_strs_target(s,d);
     end
 end

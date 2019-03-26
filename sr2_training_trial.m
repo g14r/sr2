@@ -56,7 +56,8 @@ end
 
 %% Display trial
 if (fig>0)
-    figure('Name',fig_name)
+    figure('Name',fig_name);
+    set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
     %subplot(2,1,1)
     if D.hand==1
         plot(time,force(:,LH),'LineWidth',2);
@@ -65,15 +66,18 @@ if (fig>0)
         plot(time,force(:,RH),'LineWidth',2);
         title('Force traces for RIGHT hand presses','FontSize',20);
     end
-    xlabel('Time (ms)'); ylabel('Force (N)'); set(gca,'FontSize',20); xlim([2500 4500]); ylim([-0.5 4.5]); axis square;
+    xlabel('Time (ms)'); ylabel('Force (N)'); set(gca,'FontSize',20); %xlim([2500 4500]); ylim([-0.5 4.5]); axis square;
     hold on;
-    drawline(pressTime,'dir','vert', 'linestyle','-', 'color','b');
-    drawline(relTime,'dir','vert', 'linestyle','-', 'color','r');
+    drawline(pressTime(2:end),'dir','vert', 'linestyle','-', 'color','b');
+    drawline(relTime(1:end-1),'dir','vert', 'linestyle','-', 'color','r');
     drawline(3100,'dir','vert', 'linestyle','--');
+    %drawline(3200,'dir','vert', 'linestyle','--');
     drawline(3300,'dir','vert', 'linestyle','--');
     drawline(1,'dir','horz', 'linestyle','--');
     legend({'Thumb','Index','Middle','Ring','Little'},'FontSize',20)
     hold off;
+    drawline(3200+D.RT,'dir','vert', 'linestyle',':', 'color','k');
+    drawline((3200+D.RT)+D.MT,'dir','vert', 'linestyle',':', 'color','k');
     %     subplot(2,1,2)
     %     plot(time,state,'LineWidth',2);
     %     ylim([1 7]);
