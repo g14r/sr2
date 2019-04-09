@@ -87,7 +87,7 @@ style.reset;
 style.custom({blue,lightblue,red,lightred,orange,yellow,lightyellow,purple,lightpurple,darkgray,gray,lightgray,green,lightgreen,black,silver,...
     cbs_red,cbs_yellow,cbs_blue,cbs_green,cbs_pink});
 %trsty=style.custom({red,green},'linewidth',lw,'markersize',ms,'errorwidth',lw);
-%trsty_cbs=style.custom({cbs_red,cbs_blue},'linewidth',lw,'markersize',ms,'errorwidth',lw);
+trsty_cbs=style.custom({cbs_red,cbs_blue},'linewidth',lw,'markersize',ms,'errorwidth',lw);
 ptUNsty=style.custom(ptc_un_cbs,'markersize',ms,'linewidth',lw);
 ptTRsty=style.custom(ptc_tr_cbs,'markersize',ms,'linewidth',lw);
 tfsty_cbs=style.custom({cbs_red,cbs_blue,gray,darkgray},'linewidth',lw,'markersize',ms,'errorwidth',lw);
@@ -275,8 +275,7 @@ switch (what)
         D.realPrepTime(D.free==1,1)=D.RT(D.free==1,1);
         
         % divide free-RT in quartiles and assign them to prepTime categories
-        D = getrow(D, D.isError==0);
-        [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',3, 'subset',D.free==1);
+        [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',4, 'subset',D.isError==0 & D.free==1);
         D.prepTime(D.free==1 & i==1) = 400;
         D.prepTime(D.free==1 & i==2) = 800;
         D.prepTime(D.free==1 & i==3) = 1600;
@@ -287,32 +286,25 @@ switch (what)
             {D.MT,'nanmean', 'name','MT'}, ...
             {D.realPrepTime,'nanmean', 'name','realPrepTime'}, ...
             'subset',D.isError==0);
-        
-%         % divide free-RT in quartiles and assign them to prepTime categories
-%         [i,~,~] = split_data(T.realPrepTime, 'split',[T.train T.mix], 'numquant',4, 'subset',T.free==1);
-%         T.prepTime(T.free==1 & i==1) = 400;
-%         T.prepTime(T.free==1 & i==2) = 800;
-%         T.prepTime(T.free==1 & i==3) = 1600;
-%         T.prepTime(T.free==1 & i==4) = 2400;
-
+                
         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
         T = normData(T, {'MT'}, 'sub');
         
-        %         % compute the percentage of MT at prep time 2400 to show the interaction
-        %         h=figure; [~,y]=xyplot(T.realPrepTime,(1./T.normMT),T.prepTime,'split',[T.train T.free T.mix],'style_thickline','leg','auto'); close(h);
-        %         T.pctMT = zeros(numel(T.MT),1);
-        %         trbidx = T.train==1 & T.mix==0 & T.free==0;
-        %         unbidx = T.train==0 & T.mix==0 & T.free==0;
-        %         trmidx = T.train==1 & T.mix==1 & T.free==0;
-        %         unmidx = T.train==0 & T.mix==1 & T.free==0;
-        %         %         T.pctMT(unbidx) = 100 + (100 - ( T.normMT(unbidx) * 100 ) / y(1,end));
-        %         %         T.pctMT(unmidx) = 100 + (100 - ( T.normMT(unmidx) * 100 ) / y(2,end));
-        %         %         T.pctMT(trbidx) = 100 + (100 - ( T.normMT(trbidx) * 100 ) / y(5,end));
-        %         %         T.pctMT(trmidx) = 100 + (100 - ( T.normMT(trmidx) * 100 ) / y(6,end));
-        %         T.pctMT(unbidx) = (1 ./ (T.normMT(unbidx)))  ./  y(1,end) * 100;
-        %         T.pctMT(unmidx) = (1 ./ (T.normMT(unmidx)))  ./  y(2,end) * 100;
-        %         T.pctMT(trbidx) = (1 ./ (T.normMT(trbidx)))  ./  y(5,end) * 100;
-        %         T.pctMT(trmidx) = (1 ./ (T.normMT(trmidx)))  ./  y(6,end) * 100;
+        % compute the percentage of MT at prep time 2400 to show the interaction
+        h=figure; [~,y]=xyplot(T.realPrepTime,(1./T.normMT),T.prepTime,'split',[T.train T.free T.mix],'style_thickline','leg','auto'); close(h);
+        T.pctMT = zeros(numel(T.MT),1);
+        trbidx = T.train==1 & T.mix==0 & T.free==0;
+        unbidx = T.train==0 & T.mix==0 & T.free==0;
+        trmidx = T.train==1 & T.mix==1 & T.free==0;
+        unmidx = T.train==0 & T.mix==1 & T.free==0;
+        %         T.pctMT(unbidx) = 100 + (100 - ( T.normMT(unbidx) * 100 ) / y(1,end));
+        %         T.pctMT(unmidx) = 100 + (100 - ( T.normMT(unmidx) * 100 ) / y(2,end));
+        %         T.pctMT(trbidx) = 100 + (100 - ( T.normMT(trbidx) * 100 ) / y(5,end));
+        %         T.pctMT(trmidx) = 100 + (100 - ( T.normMT(trmidx) * 100 ) / y(6,end));
+        T.pctMT(unbidx) = (1 ./ (T.normMT(unbidx)))  ./  y(1,end) * 100;
+        T.pctMT(unmidx) = (1 ./ (T.normMT(unmidx)))  ./  y(2,end) * 100;
+        T.pctMT(trbidx) = (1 ./ (T.normMT(trbidx)))  ./  y(5,end) * 100;
+        T.pctMT(trmidx) = (1 ./ (T.normMT(trmidx)))  ./  y(6,end) * 100;
         
         % make sure that you have one value per subject for each condition
         % pivottable([T.train], [T.prepTime,T.mix], T.MT, 'length');
@@ -325,46 +317,41 @@ switch (what)
         subplot(2,2,1); title('Blocked');
         plt.xy(T.realPrepTime,T.normMT,T.prepTime, 'split',[T.free T.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','north', 'subset',T.mix==0);
         xlabel('Preparation time (ms)'); ylabel('Execution time (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); 
-        xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([840 1610]);
+        xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); %ylim([840 1610]);
         hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); hold off;
         
-        %         subplot(2,2,2); title('Blocked, Interaction');
-        %         plt.xy(T.realPrepTime,T.pctMT,T.prepTime, 'split',T.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','east', 'subset',T.free==0 & T.mix==0);
-        %         xlabel('Preparation time (ms)'); ylabel('% of ET at 2400'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([65 105]);
-        %         hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); drawline(100,'dir','horz','linestyle','--','color','k'); hold off;
-        %
-        subplot(2,2,2); title('Mixed');
+        subplot(2,2,2); title('Blocked, Interaction');
+        plt.xy(T.realPrepTime,T.pctMT,T.prepTime, 'split',T.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','east', 'subset',T.free==0 & T.mix==0);
+        xlabel('Preparation time (ms)'); ylabel('% of ET at 2400'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([65 105]);
+        hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); drawline(100,'dir','horz','linestyle','--','color','k'); hold off;
+        
+        subplot(2,2,3); title('Mixed');
         plt.xy(T.realPrepTime,T.normMT,T.prepTime, 'split',[T.free T.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','north', 'subset',T.mix==1);
         xlabel('Preparation time (ms)'); ylabel('Execution time (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); 
-        xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([840 1610]);
+        xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); %ylim([840 1610]);
         hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); hold off;
         
-        %         subplot(2,2,4); title('Mixed, Interaction');
-        %         plt.xy(T.realPrepTime,T.pctMT,T.prepTime, 'split',T.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','east', 'subset',T.free==0 & T.mix==1);
-        %         xlabel('Preparation time (ms)'); ylabel('% of ET at 2400'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([65 105]);
-        %         hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); drawline(100,'dir','horz','linestyle','--','color','k'); hold off;
-        %
+        subplot(2,2,4); title('Mixed, Interaction');
+        plt.xy(T.realPrepTime,T.pctMT,T.prepTime, 'split',T.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','east', 'subset',T.free==0 & T.mix==1);
+        xlabel('Preparation time (ms)'); ylabel('% of ET at 2400'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([65 105]);
+        hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); drawline(100,'dir','horz','linestyle','--','color','k'); hold off;
         
         % stats
-        %         T = tapply(T, {'SN','train'}, ...
-        %             {T.realPrepTime,'nanmean', 'name','RT'}, ...
-        %             {T.realPrepTime,'nanmean', 'name','RTb', 'subset',T.mix==0}, ...
-        %             {T.realPrepTime,'nanmean', 'name','RTm', 'subset',T.mix==1}, ...
-        %             'subset',T.free==1);
-        %         ttest(T.RT(T.train==0), T.RT(T.train==1), 2, 'paired');
-        %         ttest(T.RTb(T.train==0), T.RTb(T.train==1), 2, 'paired');
-        %         ttest(T.RTm(T.train==0), T.RTm(T.train==1), 2, 'paired');
+        T = tapply(D, {'SN','train'}, ...
+            {D.realPrepTime,'nanmean', 'name','RT'}, ...
+            'subset',D.free==1);
+        ttest(T.RT(T.train==0), T.RT(T.train==1), 2, 'paired');
         
         T = tapply(D, {'SN','free'}, ...
-            {D.MT,'nanmean', 'name','ET', 'subset',D.prepTime==0 | D.prepTime>800}, ...
+            {D.MT,'nanmean', 'name','ET', 'subset',D.prepTime==0 | D.prepTime==2400}, ...
             'subset',D.isError==0);
         ttest(T.ET(T.free==0), T.ET(T.free==1), 2, 'paired');
         
-        %         T = tapply(D, {'SN','train','mix'}, ...
-        %             {D.MT,'nanmean', 'name','MT'}, ...
-        %             'subset',D.isError==0 & D.free==1);
-        %         ttest(T.MT(T.mix==0 & T.train==0), T.MT(T.mix==0 & T.train==1), 2, 'paired');
-        %         ttest(T.MT(T.mix==1 & T.train==0), T.MT(T.mix==1 & T.train==1), 2, 'paired');
+        T = tapply(D, {'SN','train','mix'}, ...
+            {D.MT,'nanmean', 'name','MT'}, ...
+            'subset',D.isError==0 & D.free==1);
+        ttest(T.MT(T.mix==0 & T.train==0), T.MT(T.mix==0 & T.train==1), 2, 'paired');
+        ttest(T.MT(T.mix==1 & T.train==0), T.MT(T.mix==1 & T.train==1), 2, 'paired');
         
         T = tapply(D, {'SN','train'}, ...
             {D.MT,'nanmean', 'name','MT'}, ...
@@ -382,7 +369,6 @@ switch (what)
             'subset',D.isError==0);
         T.anova = anovaMixed(T.MT,T.SN,'within', [T.prepTime,T.train], {'prepTime','train'});
         
-        %
         %         T = tapply(D, {'SN','train','prepTime'}, ...
         %             {D.MT,'nanmean', 'name','MT'}, ...
         %             'subset',D.isError==0 & D.mix==0);
@@ -395,46 +381,6 @@ switch (what)
         %
         %         T = tapply(D, {'SN','train'}, {D.MT,'nanmean', 'name','MT'}, 'subset',D.isError==0 & D.mix==1 & D.prepTime==2400);
         %         ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
-        
-        %         if nargin>1 % load single subj data
-        %             subj=varargin{1};
-        %             D=load(fullfile(pathToData,sprintf('sr2_%s_free.mat',subj))); %load data for this subject
-        %             D.SN=ones(numel(D.TN),1)*str2double(varargin{1}(2:3)); %add information about subject number
-        %         else % load group data
-        %             D=load(fullfile(pathToAnalyze,'sr2_free_all_data.mat'));
-        %         end
-        %
-        %         % add IPI info
-        %         D.IPI=diff([D.pressTime1,D.pressTime2,D.pressTime3,D.pressTime4,D.pressTime5],1,2);
-        %         D.IPI_1=D.IPI(:,1); D.IPI_2=D.IPI(:,2); D.IPI_3=D.IPI(:,3); D.IPI_4=D.IPI(:,4);
-        %
-        %         % compute actual preparation time for forced-RT trials
-        %         D.realPrepTime(D.free==0,1)=D.prepTime(D.free==0,1)+D.RT(D.free==0,1);
-        %         D.realPrepTime(D.free==1,1)=D.RT(D.free==1,1);
-        %
-        %         % create summary table for MT
-        %         T = tapply(D, {'SN','train','prepTime','mix','free'}, ...
-        %             {D.realPrepTime,'nanmean', 'name','RPT'}, ...
-        %             'subset',D.isError==0);
-        %
-        %         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-        %         T = normData(T, {'RPT'}, 'sub');
-        %
-        %         % open figure
-        %         if nargin>1; figure('Name',sprintf('Training - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('Training - group (N=%d)',ns)); end
-        %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-        %
-        %         subplot(2,2,1); title('Blocked');
-        %         plt.box(T.prepTime,T.RPT, 'split',[T.free T.train], 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','north', 'subset',T.mix==0);
-        %         xlabel('Preparation time (ms)'); ylabel('Reaction time (ms)'); set(gca,'fontsize',fs); axis square;
-        %         xticks(unique(T.prepTime)); %xlim([min(T.prepTime)-100 max(T.prepTime)+100]); %ylim([850 1600]);
-        %         hold on; drawline(unique(T.prepTime),'dir','vert','linestyle',':','color','k'); hold off;
-        %
-        %         subplot(2,2,2); title('Mixed');
-        %         plt.box(T.prepTime,T.RPT, 'split',[T.free T.train], 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','north', 'subset',T.mix==1);
-        %         xlabel('Preparation time (ms)'); ylabel('Reaction time (ms)'); set(gca,'fontsize',fs); axis square;
-        %         xticks(unique(T.prepTime)); %xlim([min(T.prepTime)-100 max(T.prepTime)+100]); %ylim([850 1600]);
-        %         hold on; drawline(unique(T.prepTime),'dir','vert','linestyle',':','color','k'); hold off;
         
         % out
         D.T=T; %incorporate the sub-structures as fields of main structure
@@ -628,25 +574,8 @@ switch (what)
         plt.line(T.IPInum,T.normIPI, 'split',[T.free T.prepTime], 'errorbars','shade', 'style',ptTRsty, 'leg',ptleg, 'leglocation','northeast', 'subset',T.train==1 & T.mix==1);
         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
         
-        %         % stats
-        %         fprintf(1, '\nANOVA:\n');
-        %         anovaMixed(T.IPI, T.SN, 'within',[T.prepTime, T.train, T.mix],{'prepTime','train','mix'}, 'subset',T.free==0 & T.IPInum==4);
-        %
-        %         % trained blocked
-        %         fprintf(1, '\ntrained blocked:\n');
-        %         ttest(T.IPI(T.prepTime==400 & ismember(T.IPInum,4) & T.train==1 & T.free==0 & T.mix==0), T.IPI(T.prepTime==2400 & ismember(T.IPInum,4) & T.train==1 & T.free==0 & T.mix==0), 2, 'paired');
-        %
-        %         % trained mixed
-        %         fprintf(1, '\ntrained mixed:\n');
-        %         ttest(T.IPI(T.prepTime==400 & ismember(T.IPInum,4) & T.train==1 & T.free==0 & T.mix==1), T.IPI(T.prepTime==2400 & ismember(T.IPInum,4) & T.train==1 & T.free==0 & T.mix==1), 2, 'paired');
-        %
-        %         % untrained blocked
-        %         fprintf(1, '\nuntrained blocked:\n');
-        %         ttest(T.IPI(T.prepTime==400 & ismember(T.IPInum,4) & T.train==0 & T.free==0 & T.mix==0), T.IPI(T.prepTime==2400 & ismember(T.IPInum,4) & T.train==0 & T.free==0 & T.mix==0), 2, 'paired');
-        %
-        %         % untrained mixed
-        %         fprintf(1, '\nuntrained mixed:\n');
-        %         ttest(T.IPI(T.prepTime==400 & ismember(T.IPInum,4) & T.train==0 & T.free==0 & T.mix==1), T.IPI(T.prepTime==2400 & ismember(T.IPInum,4) & T.train==0 & T.free==0 & T.mix==1), 2, 'paired');
+        % stats
+        anovaMixed(T.IPI, T.SN, 'within',[T.prepTime, T.train, T.mix],{'prepTime','train','mix'}, 'subset',T.free==0 & T.IPInum==4);
         
         %---------------------------------------------------------------------------------------------------
         % IPIs Comparison
@@ -655,11 +584,11 @@ switch (what)
         D.realPrepTime(D.free==1,1)=D.RT(D.free==1,1);
         
         % divide free-RT in quartiles and assign them to prepTime categories
-        [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',4, 'subset',D.isError==0 & D.free==1);
-        D.prepTime(D.free==1 & i==1) = 400;
-        D.prepTime(D.free==1 & i==2) = 800;
-        D.prepTime(D.free==1 & i==3) = 1600;
-        D.prepTime(D.free==1 & i==4) = 2400;
+%         [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',4, 'subset',D.isError==0 & D.free==1);
+%         D.prepTime(D.free==1 & i==1) = 400;
+%         D.prepTime(D.free==1 & i==2) = 800;
+%         D.prepTime(D.free==1 & i==3) = 1600;
+%         D.prepTime(D.free==1 & i==4) = 2400;
         
         % create summary table
         T2=tapply(D,{'SN','prepTime','train','mix','free'},...
@@ -683,13 +612,6 @@ switch (what)
         T3.free = [T2.free; T2.free];
         T3.train = [T2.train; T2.train];
         T3.pair = [zeros(numel(T2.SN),1); ones(numel(T2.SN),1)] + 1;
-%         T3.IPI = [T2.normfirst2ipi; T2.normIPI3; T2.normIPI4];
-%         T3.RPT = [T2.realPrepTime; T2.realPrepTime+gap; T2.realPrepTime+gap*2];
-%         T3.PT = [T2.prepTime; T2.prepTime+gap; T2.prepTime+gap*2];
-%         T3.mix = [T2.mix; T2.mix; T2.mix];
-%         T3.free = [T2.free; T2.free; T2.free];
-%         T3.train = [T2.train; T2.train; T2.train];
-%         T3.pair = [zeros(numel(T2.SN),1); ones(numel(T2.SN),1); ones(numel(T2.SN),1)*2] + 1;
         
         % open figure
         if nargin>1; figure('Name',sprintf('IPI comparison - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI comparison - group (N=%d)',ns)); end
@@ -711,107 +633,44 @@ switch (what)
         xticks(unique(T3.PT(T3.free==0))); xticklabels(repmat([400,800,1600,2400],1,3));
         drawline(unique(T3.PT(T3.free==0)),'dir','vert','linestyle',':','color','k');
         
-        %         subplot(2,2,1); title('First 2 IPIs, Blocked');
-        %         plt.xy(T2.realPrepTime,T2.normfirst2ipi,T2.prepTime, 'split',[T2.free T2.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','northeast', 'subset',T2.mix==0);
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([60 840]);
-        %
-        %         subplot(2,2,2); title('Last 2 IPIs, Blocked');
-        %         plt.xy(T2.realPrepTime,T2.normlast2ipi,T2.prepTime, 'split',[T2.free T2.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','northeast', 'subset',T2.mix==0);
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([60 840]);
-        %
-        %         subplot(2,2,3); title('First 2 IPIs, Mixed');
-        %         plt.xy(T2.realPrepTime,T2.normfirst2ipi,T2.prepTime, 'split',[T2.free T2.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','northeast', 'subset',T2.mix==1);
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([60 840]);
-        %
-        %         subplot(2,2,4); title('Last 2 IPIs, Mixed');
-        %         plt.xy(T2.realPrepTime,T2.normlast2ipi,T2.prepTime, 'split',[T2.free T2.train], 'errorbars','plusminus_wocap', 'style',tfsty_cbs, 'leg',tfleg, 'leglocation','northeast', 'subset',T2.mix==1);
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([60 840]);
-        
-        %plt.match('y');
-        
-        %         hold on;
-        %         subplot(2,2,1); title('First 2 IPIs, Blocked');
-        %         drawline(unique(T2.prepTime(T2.free==0)),'dir','vert','linestyle',':','color','k');
-        %
-        %         subplot(2,2,2); title('Last 2 IPIs, Blocked');
-        %         drawline(unique(T2.prepTime(T2.free==0)),'dir','vert','linestyle',':','color','k');
-        %
-        %         subplot(2,2,3); title('First 2 IPIs, Mixed');
-        %         drawline(unique(T2.prepTime(T2.free==0)),'dir','vert','linestyle',':','color','k');
-        %
-        %         subplot(2,2,4); title('Last 2 IPIs, Mixed');
-        %         drawline(unique(T2.prepTime(T2.free==0)),'dir','vert','linestyle',':','color','k');
-        %         hold off;
-        
         % stats
-        T2 = tapply(D, {'SN', 'train'},...
+        T2 = tapply(D, {'SN', 'train', 'mix'},...
             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
             'subset',D.isError==0 & D.free==0 & D.prepTime==2400);
-        T3.SN = [T2.SN; T2.SN];
-        T3.IPI = [T2.first2ipi; T2.last2ipi];
-        T3.IPIpair = [ones(numel(T2.first2ipi),1); ones(numel(T2.last2ipi),1)*2];
-        T3.train = [T2.train; T2.train];
-        %         T3.prepTime = [T2.prepTime; T2.prepTime];
-        %         T3.mix = [T2.mix; T2.mix];
-        %         T3.free = [T2.free; T2.free];
-        %                 T3 = tapply(T3, {'SN','train','IPIpair'}, ...
-        %                     {T3.IPI,'nanmean', 'name','IPI'}, ...
-        %                     'subset',T3.prepTime==2400 & T3.free==0);
-        T.anova = anovaMixed(T3.IPI, T3.SN, 'within', [T3.IPIpair, T3.train], {'IPIpair','train'});
+        ttest(T2.first2ipi(T2.mix==0 & T2.train==0), T2.first2ipi(T2.mix==0 & T2.train==1), 2, 'paired');
+        ttest(T2.first2ipi(T2.mix==1 & T2.train==0), T2.first2ipi(T2.mix==1 & T2.train==1), 2, 'paired');
+                
+        T3 = tapply(D, {'SN', 'train'},...
+            {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.isError==0 & D.free==0 & D.prepTime==2400);
+        T4.SN = [T3.SN; T3.SN];
+        T4.IPI = [T3.first2ipi; T3.last2ipi];
+        T4.IPIpair = [ones(numel(T3.first2ipi),1); ones(numel(T3.last2ipi),1)*2];
+        T4.train = [T3.train; T3.train];
+        anovaMixed(T4.IPI, T4.SN, 'within', [T4.IPIpair, T4.train], {'IPIpair','train'});
         
+        T5=tapply(D,{'SN','prepTime','train'},...
+            {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.isError==0 & D.free==0);
+        anovaMixed(T5.last2ipi, T5.SN, 'within', [T5.prepTime, T5.train], {'prepTime','train'});
+        T5=tapply(D,{'SN','prepTime','train'},...
+            {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.isError==0 & D.free==0 & D.mix==0);
+        anovaMixed(T5.last2ipi, T5.SN, 'within', [T5.prepTime, T5.train], {'prepTime','train'});
+        T5=tapply(D,{'SN','prepTime','train'},...
+            {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.isError==0 & D.free==0 & D.mix==1);
+        anovaMixed(T5.last2ipi, T5.SN, 'within', [T5.prepTime, T5.train], {'prepTime','train'});
         
-        T = tapply(D, {'SN'},...
-            {(D.IPI_3+D.IPI_4),'nanmean','name','IPI34fr', 'subset',D.free==1},...
-            {(D.IPI_3+D.IPI_4),'nanmean','name','IPI34fc', 'subset',D.free==0 & D.prepTime==2400},...
-            'subset',D.isError==0 & D.train==1);
-        ttest(T.IPI34fc, T.IPI34fr, 2, 'paired');
-        
-        %         T3 = tapply(D,{'SN','prepTime','train'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             'subset',D.isError==0);
-        %         T3.anova    = anovaMixed(T3.last2ipi, T3.SN, 'within', [T3.prepTime, T3.train], {'prepTime','train'});
-        %
-        %         T4 = tapply(D,{'SN','prepTime','train','mix'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             'subset',D.isError==0 & D.free==0);
-        %         T4.anova    = anovaMixed(T4.last2ipi, T4.SN, 'within', [T4.prepTime, T4.train], {'prepTime','train'}, 'subset',T4.mix==0); % blocked blocks
-        %         T4.anova    = anovaMixed(T4.last2ipi, T4.SN, 'within', [T4.prepTime, T4.train], {'prepTime','train'}, 'subset',T4.mix==1); % mixed blocks
-        %
-        %         T5 = tapply(D,{'SN','prepTime','train'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             'subset',D.isError==0 & D.free==0);
-        %         T5.anova    = anovaMixed(T5.last2ipi, T5.SN, 'within', [T5.prepTime, T5.train], {'prepTime','train'}); % forced-rt
-        %
-        %         T6 = tapply(D,{'SN','train'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             'subset',D.isError==0 & D.free==1);
-        %         ttest(T6.last2ipi(T6.train==0), T6.last2ipi(T6.train==1), 2, 'paired'); % free-rt
-        
-        
-        
-        %         T.IPIpair = ismember(T.IPInum, [3,4]);
-        %         fprintf(1, '\nANOVA:\n');
-        %         anovaMixed(T.IPI, T.SN, 'within',[T.train, T.mix T.IPIpair],{'train','mix','IPIpair'}, 'subset',T.free==0);
-        %         %         T3=tapply(D,{'SN','train'},...
-        %         %             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
-        %         %             'subset',D.isError==0 & D.mix==0 & D.free==0 & D.prepTime==2400);
-        %         %         ttest(T3.first2ipi(T3.train==0), T3.first2ipi(T3.train==1), 2, 'paired');
-        %         %
-        %         T4=tapply(D,{'SN','train'},...
-        %             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
-        %             'subset',D.isError==0 & D.mix==1 & D.free==0 & D.prepTime==2400);
-        %         ttest(T4.first2ipi(T4.train==0), T4.first2ipi(T4.train==1), 2, 'paired');
-        %         %
-        %         %         T5=tapply(D,{'SN','train'},...
-        %         %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %         %             'subset',D.isError==0 & D.mix==0 & D.free==0 & D.prepTime==2400);
-        %         %         ttest(T5.last2ipi(T5.train==0), T5.last2ipi(T5.train==1), 2, 'paired');
-        %         %
-        %         %         T6=tapply(D,{'SN','train'},...
-        %         %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %         %             'subset',D.isError==0 & D.mix==1 & D.free==0 & D.prepTime==2400);
-        %         %         ttest(T6.last2ipi(T6.train==0), T6.last2ipi(T6.train==1), 2, 'paired');
+        T6=tapply(D,{'SN','train'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.isError==0 & D.free==1);
+        ttest(T6.last2ipi(T6.train==0), T6.last2ipi(T6.train==1), 2, 'paired');
         
         % out
         D.T=T; D.T2=T2; %incorporate the sub-structures as fields of main structure

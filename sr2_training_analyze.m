@@ -15,7 +15,7 @@ function[varargout]=sr2_training_analyze(what,varargin)
 %                       [D]=sr2_training_analyze('training');                           %group          analysis of training effects over time on MT and ER, for different prep times
 %                       [D]=sr2_training_analyze('training','s01');                     %single subject analysis of training effects over time on MT and ER, for different prep times
 %
-%                       [D]=sr2_training_analyze('prepTime_works');                     %group          analysis of the effects of prep time on MT and IPI, early in training
+%                                           %group          analysis of the effects of prep time on MT and IPI, early in training
 %                       [D]=sr2_training_analyze('prepTime_works','s01');               %single subject analysis of the effects of prep time on MT and IPI, early in training
 %
 %                       [D]=sr2_training_analyze('prepTime');                           %group          analysis of the effects of prep time on MT and ER, for traingved/random sequences
@@ -349,20 +349,20 @@ switch (what)
             '45','','','','','','','','','','','56'});
         hold on; drawline(x([1 12, 13 24, 25 36, 37 48]),'dir','vert','linestyle',':','color','k'); hold off;
         
-        %         % stats
-        %         % train vs untrain, day 4
-        %         T = tapply(D,{'SN', 'train'},...
-        %             {D.MT,'mean', 'name','MT', 'subset', D.day==4 & D.BN_day>10},...
-        %             'subset', D.isError==0 & D.dummy==0 & D.rtt==0);
-        %         ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
-        %         [T.t, T.p] = ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
-        %
-        %         % day 1 vs day 4, untrain
-        %         T = tapply(D,{'SN','day'},...
-        %             {D.MT,'mean', 'name','MT', 'subset', D.train==0 & (D.day==1 | D.day==4)},...
-        %             'subset', D.isError==0 & D.dummy==0 & D.rtt==0);
-        %         ttest(T.MT(T.day==1), T.MT(T.day==4), 2, 'paired');
-        %         [T.t, T.p] = ttest(T.MT(T.day==1), T.MT(T.day==4), 2, 'paired');
+        % stats
+        % train vs untrain, day 4
+        T = tapply(D,{'SN', 'train'},...
+            {D.MT,'mean', 'name','MT', 'subset', D.day==4 & D.BN_day>10},...
+            'subset', D.isError==0 & D.dummy==0 & D.rtt==0);
+        ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
+        [T.t, T.p] = ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
+        
+        % day 1 vs day 4, untrain
+        T = tapply(D,{'SN','day'},...
+            {D.MT,'mean', 'name','MT', 'subset', D.train==0 & (D.day==1 | D.day==4)},...
+            'subset', D.isError==0 & D.dummy==0 & D.rtt==0);
+        ttest(T.MT(T.day==1), T.MT(T.day==4), 2, 'paired');
+        [T.t, T.p] = ttest(T.MT(T.day==1), T.MT(T.day==4), 2, 'paired');
         
         % create summary tables for ACC
         T = tapply(D,{'SN','day','train'},...
@@ -679,13 +679,13 @@ switch (what)
         
         % stats
         T.res = anovaMixed(T.MT,T.SN,'within', [T.prepTime,T.train], {'prepTime','train'});
-        %ttest(T.MT(T.prepTime==2400 & T.train==0), T.MT(T.prepTime==2400 & T.train==1), 2, 'paired');
+        ttest(T.MT(T.prepTime==2400 & T.train==0), T.MT(T.prepTime==2400 & T.train==1), 2, 'paired');
         %[T.t, T.p] = ttest(T.MT(T.prepTime==2400 & T.train==0), T.MT(T.prepTime==2400 & T.train==1), 2, 'paired');
         
-        %         T3 = tapply(D, {'SN','prepTime','day'}, ...
-        %             {D.MT,'nanmean', 'name','MT'}, ...
-        %             'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.train==0 & ismember(D.day,[1,4]));
-        %         T3.res = anovaMixed(T3.MT,T3.SN,'within', [T3.prepTime,T3.day], {'prepTime','day'});
+        T3 = tapply(D, {'SN','prepTime','day'}, ...
+            {D.MT,'nanmean', 'name','MT'}, ...
+            'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.train==0 & ismember(D.day,[1,4]));
+        T3.res = anovaMixed(T3.MT,T3.SN,'within', [T3.prepTime,T3.day], {'prepTime','day'});
         %
         %         % create summary tables for press ACC
         %         T = tapply(D,{'SN','prepTime','train'},...
@@ -896,39 +896,26 @@ switch (what)
         % make sure that you have one value per subject for each condition
         % pivottable(T.IPInum, T.prepTime, T.normIPI, 'length');
         
-        %         % open figure
-        %         if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
-        %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
+        % open figure
+        if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
+        set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
         
-        %---------------------------------------------------------------------------------------------------
-        %         subplot(2,2,1); title('Untrained');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.prepTime, 'errorbars','shade', 'style',ptUNsty, 'leg',ptleg, 'leglocation','northeast', 'subset',T.train==0);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
+        % ---------------------------------------------------------------------------------------------------
+        subplot(2,2,1); title('Untrained');
+        plt.line(T.IPInum,T.normIPI, 'split',T.prepTime, 'errorbars','shade', 'style',ptUNsty, 'leg',ptleg, 'leglocation','northeast', 'subset',T.train==0);
+        xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
         
-        %         subplot(2,2,2); title('Trained');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.prepTime, 'errorbars','shade', 'style',ptTRsty, 'leg',ptleg, 'leglocation','northeast', 'subset',T.train==1);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
-        %
+        subplot(2,2,2); title('Trained');
+        plt.line(T.IPInum,T.normIPI, 'split',T.prepTime, 'errorbars','shade', 'style',ptTRsty, 'leg',ptleg, 'leglocation','northeast', 'subset',T.train==1);
+        xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
+        
         % stats
-        %         T.anova    = anovaMixed(T.IPI,T.SN,'within', [T.IPInum,T.prepTime], {'IPInum','prepTime'});
-        %         T.anova_un = anovaMixed(T.IPI,T.SN,'within', [T.IPInum,T.prepTime], {'IPInum','prepTime'}, 'subset',T.train==0);
-        %         T.anova_tr = anovaMixed(T.IPI,T.SN,'within', [T.IPInum,T.prepTime], {'IPInum','prepTime'}, 'subset',T.train==1);
-        %
-        %         ttest(T.normIPI(T.IPInum==1 & T.train==0 & T.prepTime==800), T.normIPI(T.IPInum==1 & T.train==0 & T.prepTime==1600), 2, 'paired');
-        %         ttest(T.normIPI(T.IPInum==1 & T.train==1 & T.prepTime==800), T.normIPI(T.IPInum==1 & T.train==1 & T.prepTime==1600), 2, 'paired');
-        %
-        %ttest(T.normIPI(T.IPInum==2 & T.train==0 & T.prepTime==400), T.normIPI(T.IPInum==2 & T.train==0 & T.prepTime==800), 2, 'paired');
-        %ttest(T.normIPI(T.IPInum==2 & T.train==1 & T.prepTime==400), T.normIPI(T.IPInum==2 & T.train==1 & T.prepTime==800), 2, 'paired');
-        %
-        %         ttest(T.normIPI(T.IPInum==4 & T.train==0 & T.prepTime==400), T.normIPI(T.IPInum==4 & T.train==0 & T.prepTime==2400), 2, 'paired');
-        %ttest(T.normIPI(T.IPInum==4 & T.train==1 & T.prepTime==400), T.normIPI(T.IPInum==4 & T.train==1 & T.prepTime==2400), 2, 'paired');
-        
-        %         T2 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==1 & (T.prepTime==800 | T.prepTime==1600));
-        %         ttest(T2.normIPI(T2.prepTime==800), T2.normIPI(T2.prepTime==1600), 2, 'paired');
-        %         T3 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==2 & (T.prepTime==400 | T.prepTime==800));
-        %         ttest(T3.normIPI(T3.prepTime==400), T3.normIPI(T3.prepTime==800), 2, 'paired');
-        %         T4 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==4 & (T.prepTime==400 | T.prepTime==2400));
-        %         ttest(T4.normIPI(T4.prepTime==400), T4.normIPI(T4.prepTime==2400), 2, 'paired');
+        T2 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==1 & (T.prepTime==800 | T.prepTime==1600));
+        ttest(T2.normIPI(T2.prepTime==800), T2.normIPI(T2.prepTime==1600), 2, 'paired');
+        T3 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==2 & (T.prepTime==400 | T.prepTime==800));
+        ttest(T3.normIPI(T3.prepTime==400), T3.normIPI(T3.prepTime==800), 2, 'paired');
+        T4 = tapply(T, {'SN','prepTime'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==4 & (T.prepTime==400 | T.prepTime==2400));
+        ttest(T4.normIPI(T4.prepTime==400), T4.normIPI(T4.prepTime==2400), 2, 'paired');
         T5 = tapply(T, {'SN','train'}, {T.normIPI,'nanmean','name','normIPI'}, 'subset',T.IPInum==4 & T.prepTime==2400);
         ttest(T5.normIPI(T5.train==0), T5.normIPI(T5.train==1), 2, 'paired');
         
@@ -952,11 +939,9 @@ switch (what)
         T3.train = [T2.train; T2.train];
         T3.pair = [zeros(numel(T2.SN),1); ones(numel(T2.SN),1)] + 1;
         
-        %         T3.IPI = [T2.normfirst2ipi; T2.normIPI3; T2.normIPI4];
-        %         T3.RPT = [T2.realPrepTime; T2.realPrepTime+gap; T2.realPrepTime+gap*2];
-        %         T3.PT = [T2.prepTime; T2.prepTime+gap; T2.prepTime+gap*2];
-        %         T3.train = [T2.train; T2.train; T2.train];
-        %         T3.pair = [zeros(numel(T2.SN),1); ones(numel(T2.SN),1); ones(numel(T2.SN),1)*2] + 1;
+        % open figure
+        if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
+        set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
         
         subplot(2,2,1); title('');
         plt.xy(T3.RPT,T3.IPI,T3.PT, 'split',[T3.pair T3.train], 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','northeast');
@@ -967,182 +952,15 @@ switch (what)
         ylim([251 849]); %ylim([300 900]);
         drawline(unique(T3.PT),'dir','vert','linestyle',':','color','k');
         
-        %         %---------------------------------------------------------------------------------------------------
-        %         % IPIs Comparison
-        %         T2=tapply(D,{'SN','prepTime','train'},...
-        %             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             {D.prepTime + D.RT,'nanmean', 'name','realPrepTime'}, ... % compute actual preparation time
-        %             'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.day==4 & D.BN_day>10);
-        %
-        %         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-        %         T2 = normData(T2, {'first2ipi','last2ipi'}, 'sub');
-        %
-        %         % make sure that you have one value per subject for each condition
-        %         % pivottable(T2.train, T2.prepTime, T2.normfirst2ipi, 'length'); % pivottable(T2.train, T2.prepTime, T2.normlast2ipi, 'length');
-        %
-        %         % open figure
-        %         if nargin>1; figure('Name',sprintf('IPI comparison - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI comparison - group (N=%d)',ns)); end
-        %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-        %
-        %         subplot(2,2,3); title('First 2 IPIs');
-        %         plt.xy(T2.realPrepTime,T2.normfirst2ipi,T2.prepTime, 'split',T2.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','northeast');
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime)-100 max(T.prepTime)+100]); ylim([300 900]);
-        %
-        %         subplot(2,2,4); title('Last 2 IPIs');
-        %         plt.xy(T2.realPrepTime,T2.normlast2ipi,T2.prepTime, 'split',T2.train, 'errorbars','plusminus_wocap', 'style',trsty_cbs, 'leg',trleg, 'leglocation','northeast');
-        %         xlabel('Preparation time (ms)'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime)); xlim([min(T.prepTime)-100 max(T.prepTime)+100]); ylim([300 900]);
-        %
-        %         hold on;
-        %         subplot(2,2,3); title('First 2 IPIs');
-        %         drawline(unique(T.prepTime),'dir','vert','linestyle',':','color','k');
-        %         subplot(2,2,4); title('Last 2 IPIs');
-        %         drawline(unique(T.prepTime),'dir','vert','linestyle',':','color','k');
-        %         hold off;
-        
         % stats
-        %         T3.SN = [T2.SN; T2.SN];
-        %         T3.IPI = [T2.first2ipi; T2.last2ipi];
-        %         T3.IPIpair = [ones(numel(T2.first2ipi),1); ones(numel(T2.last2ipi),1)*2];
-        %         T3.train = [T2.train; T2.train];
-        %         T3.prepTime = [T2.prepTime; T2.prepTime];
-        %         T3 = tapply(T3, {'SN','train','IPIpair'}, {T3.IPI,'nanmean', 'name','IPI'}, 'subset',T3.prepTime==2400);
-        %         T.anova = anovaMixed(T3.IPI, T3.SN, 'within', [T3.IPIpair, T3.train], {'IPIpair','train'});
-        %
-        %         T.anova    = anovaMixed(T2.last2ipi, T2.SN, 'within', [T2.prepTime, T2.train], {'prepTime','train'});
-        %         T3=tapply(D,{'SN','train'},...
-        %             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
-        %             'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.day==4 & D.BN_day>10 & D.prepTime==2400);
-        %         ttest(T3.first2ipi(T3.train==0), T3.first2ipi(T3.train==1), 2, 'paired');
-        %
-        %         T5=tapply(D,{'SN','train'},...
-        %             {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
-        %             'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.day==4 & D.BN_day>10 & D.prepTime==2400);
-        %         ttest(T5.last2ipi(T5.train==0), T5.last2ipi(T5.train==1), 2, 'paired');
-        
-        %         %---------------------------------------------------------------------------------------------------
-        %         % create summary table for MT
-        %         T=tapply(D,{'SN','day','seqNum'},...
-        %             {D.IPI_1,'nanmean','name','IPI1'},...
-        %             {D.IPI_2,'nanmean','name','IPI2'},...
-        %             {D.IPI_3,'nanmean','name','IPI3'},...
-        %             {D.IPI_4,'nanmean','name','IPI4'},...
-        %             'subset',D.isError==0 & D.dummy==0 & D.rtt==0 & D.train==1);
-        %         for i=1:size(D.IPI,2)
-        %             T.IPI(:,i)=eval(sprintf('T.IPI%d',i));
-        %             T=rmfield(T,sprintf('IPI%d',i));
-        %             T.IPInum(:,i)=ones(size(T.SN,1),1)*i;
-        %             T.SN(:,i)=T.SN(:,1);
-        %             T.day(:,i)=T.day(:,1);
-        %             T.seqNum(:,i)=T.seqNum(:,1);
-        %         end
-        %         T.IPI=reshape(T.IPI,size(T.IPI,1)*size(T.IPI,2),1);
-        %         T.IPInum=reshape(T.IPInum,size(T.IPInum,1)*size(T.IPInum,2),1);
-        %         T.SN=reshape(T.SN,size(T.SN,1)*size(T.SN,2),1);
-        %         T.day=reshape(T.day,size(T.day,1)*size(T.day,2),1);
-        %         T.seqNum=reshape(T.seqNum,size(T.seqNum,1)*size(T.seqNum,2),1);
-        %
-        %         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-        %         T = normData(T, {'IPI'}, 'sub');
-        %
-        %         % make sure that you have one value per subject for each condition
-        %         % pivottable(T.IPInum, T.prepTime, T.normIPI, 'length');
-        %
-        %         % open figure
-        %         if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
-        %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-        %
-        %         subplot(2,5,1); title('Seq01: 1 3 2 4 5');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==1);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,2); title('Seq02: 1 4 5 2 3');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==2);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,3); title('Seq03: 2 4 3 5 1');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==3);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,4); title('Seq04: 2 5 1 4 3');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==4);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,5); title('Seq05: 3 1 2 5 4');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==5);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,6); title('Seq06: 3 5 4 2 1');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==6);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,7); title('Seq07: 4 1 5 3 2');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==7);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,8); title('Seq08: 4 2 3 1 5');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==8);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,9); title('Seq09: 5 2 1 3 4');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==9);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,5,10); title('Seq10: 5 3 4 1 2');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.seqNum==10);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         plt.match('y');
-        %
-        %         %---------------------------------------------------------------------------------------------------
-        %         T=tapply(D,{'SN','day','seqNum'},...
-        %             {D.IPI_1,'nanmean','name','IPI1'},...
-        %             {D.IPI_2,'nanmean','name','IPI2'},...
-        %             {D.IPI_3,'nanmean','name','IPI3'},...
-        %             {D.IPI_4,'nanmean','name','IPI4'},...
-        %             'subset',D.isError==0 & D.dummy==0 & D.rtt==0 & D.train==0);
-        %         for i=1:size(D.IPI,2)
-        %             T.IPI(:,i)=eval(sprintf('T.IPI%d',i));
-        %             T=rmfield(T,sprintf('IPI%d',i));
-        %             T.IPInum(:,i)=ones(size(T.SN,1),1)*i;
-        %             T.SN(:,i)=T.SN(:,1);
-        %             T.day(:,i)=T.day(:,1);
-        %             T.seqNum(:,i)=T.seqNum(:,1);
-        %         end
-        %         T.IPI=reshape(T.IPI,size(T.IPI,1)*size(T.IPI,2),1);
-        %         T.IPInum=reshape(T.IPInum,size(T.IPInum,1)*size(T.IPInum,2),1);
-        %         T.SN=reshape(T.SN,size(T.SN,1)*size(T.SN,2),1);
-        %         T.day=reshape(T.day,size(T.day,1)*size(T.day,2),1);
-        %         T.seqNum=reshape(T.seqNum,size(T.seqNum,1)*size(T.seqNum,2),1);
-        %
-        %         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-        %         T = normData(T, {'IPI'}, 'sub');
-        %
-        %         % make sure that you have one value per subject for each condition
-        %         % pivottable(T.IPInum, T.prepTime, T.normIPI, 'length');
-        %
-        %         % open figure
-        %         if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
-        %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-        %
-        %         subplot(2,2,1); title('Day 1');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.seqNum, 'errorbars','shade', 'leg','skip', 'subset',T.day==1);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,2,2); title('Day 2');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.seqNum, 'errorbars','shade', 'leg','skip', 'subset',T.day==2);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,2,3); title('Day 3');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.seqNum, 'errorbars','shade', 'leg','skip', 'subset',T.day==3);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         subplot(2,2,4); title('Day 4');
-        %         plt.line(T.IPInum,T.normIPI, 'split',T.seqNum, 'errorbars','shade', 'leg','skip', 'subset',T.day==4);
-        %         xlabel('Interval number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; %ylim([60 600]);
-        %
-        %         plt.match('y');
-        
+        T4=tapply(D,{'SN','prepTime','train'},...
+            {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
+            {(D.IPI_3+D.IPI_4),'nanmean','name','last2ipi'},...
+            'subset',D.dummy==0 & D.rtt==0 & D.isError==0 & D.day==4 & D.BN_day>10);
+        ttest(T4.first2ipi(T4.prepTime==1600 & T4.train==0), T4.first2ipi(T2.prepTime==1600 & T4.train==1), 2, 'paired');
+        ttest(T4.last2ipi(T4.prepTime==1600 & T4.train==0), T4.first2ipi(T2.prepTime==1600 & T4.train==1), 2, 'paired');
+        anovaMixed(T4.last2ipi, T4.SN, 'within', [T4.prepTime, T4.train], {'prepTime','train'});
+                
         % out
         D.T=T; D.T2=T2; %incorporate the sub-structures as fields of main structure
         varargout={D}; %return main structure
