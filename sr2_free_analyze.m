@@ -86,7 +86,6 @@ ms=13; %10; %default marker size for all figures
 style.reset;
 style.custom({blue,lightblue,red,lightred,orange,yellow,lightyellow,purple,lightpurple,darkgray,gray,lightgray,green,lightgreen,black,silver,...
     cbs_red,cbs_yellow,cbs_blue,cbs_green,cbs_pink});
-%trsty=style.custom({red,green},'linewidth',lw,'markersize',ms,'errorwidth',lw);
 trsty_cbs=style.custom({cbs_red,cbs_blue},'linewidth',lw,'markersize',ms,'errorwidth',lw);
 ptUNsty=style.custom(ptc_un_cbs,'markersize',ms,'linewidth',lw);
 ptTRsty=style.custom(ptc_tr_cbs,'markersize',ms,'linewidth',lw);
@@ -266,6 +265,7 @@ switch (what)
             D=load(fullfile(pathToAnalyze,'sr2_free_all_data.mat'));
         end
         
+        %---------------------------------------------------------------------------------------------------
         % add IPI info
         D.IPI=diff([D.pressTime1,D.pressTime2,D.pressTime3,D.pressTime4,D.pressTime5],1,2);
         D.IPI_1=D.IPI(:,1); D.IPI_2=D.IPI(:,2); D.IPI_3=D.IPI(:,3); D.IPI_4=D.IPI(:,4);
@@ -281,6 +281,7 @@ switch (what)
         D.prepTime(D.free==1 & i==3) = 1600;
         D.prepTime(D.free==1 & i==4) = 2400;
         
+        %---------------------------------------------------------------------------------------------------
         % create summary table for MT
         T = tapply(D, {'SN','train','prepTime','mix','free'}, ...
             {D.MT,'nanmean', 'name','MT'}, ...
@@ -297,10 +298,6 @@ switch (what)
         unbidx = T.train==0 & T.mix==0 & T.free==0;
         trmidx = T.train==1 & T.mix==1 & T.free==0;
         unmidx = T.train==0 & T.mix==1 & T.free==0;
-        %         T.pctMT(unbidx) = 100 + (100 - ( T.normMT(unbidx) * 100 ) / y(1,end));
-        %         T.pctMT(unmidx) = 100 + (100 - ( T.normMT(unmidx) * 100 ) / y(2,end));
-        %         T.pctMT(trbidx) = 100 + (100 - ( T.normMT(trbidx) * 100 ) / y(5,end));
-        %         T.pctMT(trmidx) = 100 + (100 - ( T.normMT(trmidx) * 100 ) / y(6,end));
         T.pctMT(unbidx) = (1 ./ (T.normMT(unbidx)))  ./  y(1,end) * 100;
         T.pctMT(unmidx) = (1 ./ (T.normMT(unmidx)))  ./  y(2,end) * 100;
         T.pctMT(trbidx) = (1 ./ (T.normMT(trbidx)))  ./  y(5,end) * 100;
@@ -308,7 +305,8 @@ switch (what)
         
         % make sure that you have one value per subject for each condition
         % pivottable([T.train], [T.prepTime,T.mix], T.MT, 'length');
-
+        
+        %---------------------------------------------------------------------------------------------------
         % open figure
         if nargin>1; figure('Name',sprintf('Prep time - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('Prep time - group (N=%d)',ns)); end
         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
@@ -336,6 +334,7 @@ switch (what)
         xlabel('Preparation time (ms)'); ylabel('% of ET at 2400'); set(gca,'fontsize',fs); axis square; xticks(unique(T.prepTime(T.free==0))); xlim([min(T.prepTime(T.free==0))-100 max(T.prepTime(T.free==0))+100]); ylim([65 105]);
         hold on; drawline(unique(T.prepTime(T.free==0)),'dir','vert','linestyle',':','color','k'); drawline(100,'dir','horz','linestyle','--','color','k'); hold off;
         
+        %---------------------------------------------------------------------------------------------------
         % stats
         T = tapply(D, {'SN','train'}, ...
             {D.realPrepTime,'nanmean', 'name','RT'}, ...
@@ -368,19 +367,6 @@ switch (what)
             {D.MT,'nanmean', 'name','MT'}, ...
             'subset',D.isError==0);
         T.anova = anovaMixed(T.MT,T.SN,'within', [T.prepTime,T.train], {'prepTime','train'});
-        
-        %         T = tapply(D, {'SN','train','prepTime'}, ...
-        %             {D.MT,'nanmean', 'name','MT'}, ...
-        %             'subset',D.isError==0 & D.mix==0);
-        %         T.anova_blocked = anovaMixed(T.MT,T.SN,'within', [T.prepTime,T.train], {'prepTime','train'});
-        %
-        %         T = tapply(D, {'SN','train','prepTime'}, ...
-        %             {D.MT,'nanmean', 'name','MT'}, ...
-        %             'subset',D.isError==0 & D.mix==1);
-        %         T.anova_mixed = anovaMixed(T.MT,T.SN,'within', [T.prepTime,T.train], {'prepTime','train'});
-        %
-        %         T = tapply(D, {'SN','train'}, {D.MT,'nanmean', 'name','MT'}, 'subset',D.isError==0 & D.mix==1 & D.prepTime==2400);
-        %         ttest(T.MT(T.train==0), T.MT(T.train==1), 2, 'paired');
         
         % out
         D.T=T; %incorporate the sub-structures as fields of main structure
@@ -480,22 +466,6 @@ switch (what)
         plt.bar(D3.SN(~isnan(D3.RTfr)),D3.RTfr(~isnan(D3.RTfr)),'split',D3.train,'style',sty,'leg',trleg);
         xlabel('Subject number'); ylabel('Mean RT (ms)'); set(gca,'fontsize',fs); title('Free-RT');
         
-        %         % Scatter plot MT-RT
-        %         if nargin>1; figure('Name',sprintf('Scatterplot MT-RT - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('Scatterplot RT-MT - group (N=%d)',ns)); end
-        %         sty=style.custom({red,blue},'markersize',ms,'linewidth',lw);
-        %
-        %         subplot(1,3,1);
-        %         plt.scatter(D.MT,D.RT,'split',D.train,'subset',D.free==1 & D.dummy==0 & D.isError==0 & D.rtt==0,'style',sty,'leg',trleg);
-        %         title('Free-RT'); xlabel('MT (ms)'); ylabel('RT (ms)'); set(gca,'fontsize',fs); %axis square;
-        %
-        %         subplot(1,3,2);
-        %         plt.scatter(D.MT,D.RT,'split',D.train,'subset',D.free==1 & D.mix==0 & D.dummy==0 & D.isError==0 & D.rtt==0,'style',sty,'leg',trleg);
-        %         title('Free-RT | Blocked'); xlabel('MT (ms)'); ylabel('RT (ms)'); set(gca,'fontsize',fs); %axis square;
-        %
-        %         subplot(1,3,3);
-        %         plt.scatter(D.MT,D.RT,'split',D.train,'subset',D.free==1 & D.mix==1 & D.dummy==0 & D.isError==0 & D.rtt==0,'style',sty,'leg',trleg);
-        %         title('Free-RT | Mixed'); xlabel('MT (ms)'); ylabel('RT (ms)'); set(gca,'fontsize',fs); %axis square;
-        
         % stats
         T = tapply(D,{'SN','train'},...
             {D.RT,'nanmean','name','RTfr','subset',D.free==1},...
@@ -519,6 +489,7 @@ switch (what)
             D=load(fullfile(pathToAnalyze,'sr2_free_all_data.mat'));
         end
         
+        %---------------------------------------------------------------------------------------------------
         % add IPI info
         D.IPI=diff([D.pressTime1,D.pressTime2,D.pressTime3,D.pressTime4,D.pressTime5],1,2);
         D.IPI_1=D.IPI(:,1); D.IPI_2=D.IPI(:,2); D.IPI_3=D.IPI(:,3); D.IPI_4=D.IPI(:,4);
@@ -584,11 +555,11 @@ switch (what)
         D.realPrepTime(D.free==1,1)=D.RT(D.free==1,1);
         
         % divide free-RT in quartiles and assign them to prepTime categories
-%         [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',4, 'subset',D.isError==0 & D.free==1);
-%         D.prepTime(D.free==1 & i==1) = 400;
-%         D.prepTime(D.free==1 & i==2) = 800;
-%         D.prepTime(D.free==1 & i==3) = 1600;
-%         D.prepTime(D.free==1 & i==4) = 2400;
+        [i,~,~] = split_data(D.realPrepTime, 'split',[D.SN D.train D.mix], 'numquant',4, 'subset',D.isError==0 & D.free==1);
+        D.prepTime(D.free==1 & i==1) = 400;
+        D.prepTime(D.free==1 & i==2) = 800;
+        D.prepTime(D.free==1 & i==3) = 1600;
+        D.prepTime(D.free==1 & i==4) = 2400;
         
         % create summary table
         T2=tapply(D,{'SN','prepTime','train','mix','free'},...
@@ -599,7 +570,6 @@ switch (what)
                         
         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
         T2 = normData(T2, {'first2ipi','last2ipi','realPrepTime'}, 'sub');
-        %T2 = normData(T2, {'first2ipi', 'IPI3', 'IPI4'}, 'sub');
         
         % make sure that you have one value per subject for each condition
         % pivottable(T2.train, [T2.mix T2.prepTime], T2.normfirst2ipi, 'length'); % pivottable(T2.train, [T2.mix T2.prepTime], T2.normlast2ipi, 'length');
@@ -633,6 +603,7 @@ switch (what)
         xticks(unique(T3.PT(T3.free==0))); xticklabels(repmat([400,800,1600,2400],1,3));
         drawline(unique(T3.PT(T3.free==0)),'dir','vert','linestyle',':','color','k');
         
+        %---------------------------------------------------------------------------------------------------
         % stats
         T2 = tapply(D, {'SN', 'train', 'mix'},...
             {(D.IPI_1+D.IPI_2),'nanmean','name','first2ipi'},...
@@ -681,6 +652,7 @@ switch (what)
         xls_fn=fullfile(pathToDropbox,'sr2_logfile.xlsx'); xls_sheet='dPrime';
         [num,text,~]=xlsread(xls_fn,xls_sheet);
         
+        %---------------------------------------------------------------------------------------------------
         % store data in dataframe structure
         D.subj=text(2:end,1);
         D.SN=num(:,1);
@@ -706,6 +678,7 @@ switch (what)
             [D.dPrime(ss,1),D.bias(ss,1)]=dprime(D.HIT(ss,1),D.FA(ss,1),D.N_yes(ss,1));
         end
         
+        %---------------------------------------------------------------------------------------------------
         % create summary table for d' and bias
         D1=tapply(D,{'SN'},...
             {D.dPrime,'nanmean','name','d'},...
@@ -722,28 +695,14 @@ switch (what)
         if nargin>1; figure('Name',sprintf('Sequence memory - subj %02d',subvec)); else; figure('Name',sprintf('Sequence memory - group (N=%d)',ns)); end
         
         sty=style.custom({lightgray,gray,black},'markersize',ms,'linewidth',lw);
-        %         subplot(3,2,1);
-        %         plt.bar(D1.SN,[D1.rFirst,D1.rSecond,D1.r],'style',sty,'leg',sessleg); legend off; title('Sequence recall test'); drawline(chance,'dir','horz','linestyle','--','color',silver);
-        %         xlabel('Subject number'); ylabel('Accuacy (%)'); xt=xticks; xticks(xt(2:3:end)); xticklabels(unique(D.SN)); set(gca,'fontsize',fs); ylim([0 100]);
         subplot(2,2,1);
         plt.bar(ones(numel(D1.SN),1),[D1.rFirst,D1.rSecond,D1.r],'style',sty,'leg',sessleg); drawline(chance,'dir','horz','linestyle','--','color',silver);
         xlabel('Group average'); ylabel('Accuacy (%)'); xticklabels(''); axis square; set(gca,'fontsize',fs); ylim([0 100]);
         
         sty=style.custom({yellow,orange,red},'markersize',ms,'linewidth',lw);
-        %         subplot(3,2,3);
-        %         plt.bar(D1.SN,[D1.dFirst,D1.dSecond,D1.d],'style',sty,'leg',sessleg); legend off; title('Sequence recognition test');
-        %         xlabel('Subject number'); ylabel('d-prime'); xt=xticks; xticks(xt(2:3:end)); xticklabels(unique(D.SN)); set(gca,'fontsize',fs);
         subplot(2,2,2);
         plt.bar(ones(numel(D1.SN),1),[D1.dFirst,D1.dSecond,D1.d],'style',sty,'leg',sessleg);
         xlabel('Group average'); ylabel('d-prime'); xticklabels(''); axis square; set(gca,'fontsize',fs); %ylim([0 2]);
-        
-        %         sty=style.custom({lightblue,blue,purple},'markersize',ms,'linewidth',lw);
-        %         subplot(3,2,5);
-        %         plt.bar(D1.SN,[D1.bFirst,D1.bSecond,D1.b],'style',sty,'leg',sessleg); legend off; title('Sequence recognition test');
-        %         xlabel('Subject number'); ylabel('Bias'); xt=xticks; xticks(xt(2:3:end)); xticklabels(unique(D.SN)); set(gca,'fontsize',fs);
-        %         subplot(3,2,6);
-        %         plt.bar(ones(numel(D1.SN),1),[D1.bFirst,D1.bSecond,D1.b],'style',sty,'leg',sessleg);
-        %         xlabel('Group average'); ylabel('Bias'); xticklabels(''); axis square; set(gca,'fontsize',fs); %ylim([0 0.2]);
         
         % out
         varargout={D}; %return main structure
@@ -774,6 +733,7 @@ switch (what)
             D=load(fullfile(pathToAnalyze,'sr2_free_all_data.mat'));
         end
         
+        %---------------------------------------------------------------------------------------------------
         % load force data
         b=0; %initialize block number
         for t=1:numel(D.TN)
@@ -831,6 +791,7 @@ switch (what)
             if isempty(delta_t_pressRelease_firstPress)||(delta_t_pressRelease_firstPress==0); D.peak_release_velocity_firstPress(t,1)=NaN; else; D.peak_release_velocity_firstPress(t,1)=min(diff(force(force(:,RH(D.press1(t,1)))>1,RH(D.press1(t,1))))); end
             D.peak_release_velocity_avgAllFingers(t,1)=nanmean([D.peak_release_velocity_T(t,1),D.peak_release_velocity_I(t,1),D.peak_release_velocity_M(t,1),D.peak_release_velocity_R(t,1),D.peak_release_velocity_L(t,1)]);
             
+            %---------------------------------------------------------------------------------------------------
             % plot trial
             fig=0; % 1=yes|0=no
             if fig==1
@@ -899,37 +860,6 @@ switch (what)
         ttest(D2.F(D2.mix==0 & D2.free==1 & D2.train==0), D2.F(D2.mix==0 & D2.free==1 & D2.train==1), 2, 'paired');
         ttest(D2.F(D2.mix==1 & D2.free==0 & D2.train==0), D2.F(D2.mix==1 & D2.free==0 & D2.train==1), 2, 'paired');
         ttest(D2.F(D2.mix==1 & D2.free==1 & D2.train==0), D2.F(D2.mix==1 & D2.free==1 & D2.train==1), 2, 'paired');
-%         %---------------------------------------------------------------------------------------------
-%         % create summary tables for peak press force
-%         D2=tapply(D,{'SN','BN','train'},...
-%             {D.peak_press_force_avgAllFingers,'nanmedian','name','F'},...
-%             'subset',D.isError==0 & D.free==0);
-%         
-%         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-%         D2 = normData(D2, {'F'}, 'sub');
-%         
-%         %         % open figure
-%         %         if nargin>1; figure('Name',sprintf('Peak press force - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('Peak press force - group (N=%d)',ns)); end
-%         %         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-%         
-%         subplot(2,2,3); title('Forced-RT');
-%         plt.box(D2.BN,D2.normF, 'split',D2.train, 'style',trsty_cbs, 'leg',trleg, 'leglocation','northwest');
-%         xlabel('Block number'); ylabel('Peak press force (N)'); set(gca,'fontsize',fs); axis square;
-%         ylim([1.8 5.2]);
-%         
-%         %---------------------------------------------------------------------------------------------
-%         % create summary tables for peak press force
-%         D2=tapply(D,{'SN','BN','train'},...
-%             {D.peak_press_force_avgAllFingers,'nanmedian','name','F'},...
-%             'subset',D.isError==0 & D.free==1);
-%         
-%         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
-%         D2 = normData(D2, {'F'}, 'sub');
-%         
-%         subplot(2,2,4); title('Free-RT');
-%         plt.box(D2.BN,D2.normF, 'split',D2.train, 'style',trsty_cbs, 'leg',trleg, 'leglocation','northwest');
-%         xlabel('Block number'); ylabel('Peak press force (N)'); set(gca,'fontsize',fs); axis square;
-%         ylim([1.8 5.2]);
         
         % out
         varargout={D}; %return main structure
@@ -943,6 +873,7 @@ switch (what)
             D = load( fullfile(pathToAnalyze, 'sr2_free_all_data.mat') );
         end
         
+        %---------------------------------------------------------------------------------------------------
         % open figure
         if nargin>1; figure('Name',sprintf('Press duration / overlap - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('Press duration / overlap - group (N=%d)',ns)); end
         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
@@ -969,6 +900,7 @@ switch (what)
             '31','','','','','','','','','','','',... '42',...
             '45','','','','','','','','','','','56'});
         
+        %---------------------------------------------------------------------------------------------------
         % create summary table
         T = tapply(D,{'SN', 'train', 'day', 'BN'},...
             {sum(D.rel2press_dur,2),'nanmedian', 'name','r2p'},...
