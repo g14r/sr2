@@ -58,7 +58,6 @@ end
 if (fig>0)
     figure('Name',fig_name);
     set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
-    %subplot(2,1,1)
     if D.hand==1
         plot(time,force(:,LH),'LineWidth',2);
         title('Force traces for LEFT hand presses','FontSize',20);
@@ -78,11 +77,4 @@ if (fig>0)
     hold off;
     drawline(3200+D.RT,'dir','vert', 'linestyle',':', 'color','k');
     drawline((3200+D.RT)+D.MT,'dir','vert', 'linestyle',':', 'color','k');
-    %     subplot(2,1,2)
-    %     plot(time,state,'LineWidth',2);
-    %     ylim([1 7]);
-    %     xlabel('Time (ms)'); ylabel('State'); set(gca,'FontSize',20);
-    %     hold on;
-    %     drawline(pressTime,'dir','vert'); legend state
-    %     KbWait;
 end
