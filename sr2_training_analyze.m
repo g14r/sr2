@@ -734,6 +734,46 @@ switch (what)
         D.IPI=diff([D.pressTime1,D.pressTime2,D.pressTime3,D.pressTime4,D.pressTime5],1,2);
         D.IPI_1=D.IPI(:,1); D.IPI_2=D.IPI(:,2); D.IPI_3=D.IPI(:,3); D.IPI_4=D.IPI(:,4);
         
+%         %%
+%         %---------------------------------------------------------------------------------------------------
+%         % create summary table for MT
+%         T=tapply(D,{'SN','day','train'},...
+%             {D.IPI_1,'nanmean','name','IPI1'},...
+%             {D.IPI_2,'nanmean','name','IPI2'},...
+%             {D.IPI_3,'nanmean','name','IPI3'},...
+%             {D.IPI_4,'nanmean','name','IPI4'},...
+%             'subset',D.isError==0 & D.dummy==0 & D.rtt==0 & D.prepTime==2400);
+%         for i=1:size(D.IPI,2)
+%             T.IPI(:,i)=eval(sprintf('T.IPI%d',i));
+%             T=rmfield(T,sprintf('IPI%d',i));
+%             T.IPInum(:,i)=ones(size(T.SN,1),1)*i;
+%             T.SN(:,i)=T.SN(:,1);
+%             T.day(:,i)=T.day(:,1);
+%             T.train(:,i)=T.train(:,1);
+%         end
+%         T.IPI=reshape(T.IPI,size(T.IPI,1)*size(T.IPI,2),1);
+%         T.IPInum=reshape(T.IPInum,size(T.IPInum,1)*size(T.IPInum,2),1);
+%         T.SN=reshape(T.SN,size(T.SN,1)*size(T.SN,2),1);
+%         T.day=reshape(T.day,size(T.day,1)*size(T.day,2),1);
+%         T.train=reshape(T.train,size(T.train,1)*size(T.train,2),1);
+%         
+%         % normalize MT data to remove between-subject variability (i.e. plot within-subject standard error)
+%         T = normData(T, {'IPI'}, 'sub');
+%         
+%         % open figure
+%         if nargin>1; figure('Name',sprintf('IPI - subj %02d',str2double(varargin{1}(2:3)))); else; figure('Name',sprintf('IPI - group (N=%d)',ns)); end
+%         set(gcf, 'Units','normalized', 'Position',[0.1,0.1,0.8,0.8], 'Resize','off', 'Renderer','painters');
+%         
+%         % ---------------------------------------------------------------------------------------------------
+%         subplot(1,2,1); title('Untrained');
+%         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.train==0);
+%         xlabel('Transition number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
+%         
+%         subplot(1,2,2); title('Trained');
+%         plt.line(T.IPInum,T.normIPI, 'split',T.day, 'errorbars','shade', 'style',ipisty, 'leg',dleg, 'leglocation','northeast', 'subset',T.train==1);
+%         xlabel('Transition number'); ylabel('Inter-press interval (ms)'); set(gca,'fontsize',fs); axis square; ylim([50 500]);
+%         %%
+        
         %---------------------------------------------------------------------------------------------------
         % create summary table for MT
         T=tapply(D,{'SN','prepTime','train'},...
